@@ -21,6 +21,7 @@ from ldm.models.diffusion.ddim import DDIMSampler
 from ldm.util import instantiate_from_config
 
 from torch_fidelity import calculate_metrics
+from cleanfid import fid
 
 rescale = lambda x: (x + 1.0) / 2.0
 
@@ -355,19 +356,32 @@ if __name__ == "__main__":
         nplog=numpylogdir,
     )
 
+    # if opt.fid_real_dir:
+    #     metrics = calculate_metrics(
+    #         # input1=opt.fid_real_dir,
+    #         input1="cifar10-val",
+    #         input2=imglogdir,  # 本次產生的影像
+    #         cuda=torch.cuda.is_available(),
+    #         fid=True,
+    #     )
+    #     fid_value = metrics["frechet_inception_distance"]
+
+    #     fid_log_path = os.path.join(logdir, "fid")
+    #     with open(fid_log_path, "w") as fid_log_file:
+    #         fid_log_file.write(f"Frechet Inception Distance: {fid_value}\n")
+    
     if opt.fid_real_dir:
-        metrics = calculate_metrics(
-            # input1=opt.fid_real_dir,   # 真實影像資料夾
-            input1="cifar10-val",
-            input2=imglogdir,  # 本次產生的影像
-            cuda=torch.cuda.is_available(),
-            fid=True,
+        fid_value = fid.compute_fid(
+            imglogdir,
+            dataset_name="cifar10",
+            dataset_res=32,
+            dataset_split="test",
+            mode="clean",
         )
-        fid_value = metrics["frechet_inception_distance"]
-        # print(f"FID: {fid_value}")
-        # 將 FID 結果寫入 logdir/fid 檔案
-        fid_log_path = os.path.join(logdir, "fid")
+        print(f"Clean-FID: {fid_value:.2f}")
+
+        fid_log_path = os.path.join(logdir, "fid.txt")
         with open(fid_log_path, "w") as fid_log_file:
-            fid_log_file.write(f"Frechet Inception Distance: {fid_value}\n")
+            fid_log_file.write(f"Clean-FID: {fid_value:.2f}\n")
 
     print("done.")

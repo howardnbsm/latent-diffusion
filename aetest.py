@@ -15,6 +15,8 @@ from ldm.util import instantiate_from_config
 from torchvision.transforms import ToTensor, Normalize, Resize, Compose
 import math
 
+# from torchmetrics.image.fid import FrechetInceptionDistance
+
 #1 construct path
 CONFIG_PATH = "configs/autoencoder/autoencoder_cifar10.yaml"
 CKPT_PATH   = "logs/2025-07-25T14-09-05_autoencoder_cifar10/checkpoints/last.ckpt"
@@ -72,3 +74,12 @@ mse = diff.pow(2).mean().item()
 mae = diff.abs().mean().item()
 psnr = 10 * math.log10(1.0 / mse)
 print(f"MSE: {mse:.6f}, MAE: {mae:.6f}, PSNR: {psnr:.2f} dB")
+
+# fid = FrechetInceptionDistance(feature=64).cuda()  # feature=64 for CIFAR-10
+
+# # 將原始和重建影像都加到 FID 計算
+# fid.update(orig_batch.cuda(), real=True)
+# fid.update(rec.cuda(), real=False)
+
+# fid_score = fid.compute().item()
+# print(f"FID: {fid_score:.2f}")
